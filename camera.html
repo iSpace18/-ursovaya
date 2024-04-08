@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Видео и аудио через веб-камеру</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background:url(/img/mUIkM061Ljzp.jpg);
+        background-size: cover;
+        background-repeat: no-repeat;
+        padding: 20px;
+        margin: 0;
+        color: white;
+    }
+    header {
+        text-align: center;
+    }
+    img {
+        display: block;
+        margin: 0 auto;
+        
+       }
+    .video-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        top: -700px;
+        width: 1000px;
+        left: 400px;
+        position: relative;
+        /* background-color: rgb(0, 0, 0); */
+        border: 5px solid black;
+        border-radius: 10px;
+        border-color: rgba(0, 0, 0, 0.205);
+    }
+    video {
+        width: 100%;
+        margin-left: 10px;
+        max-width: 320px;
+        display: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    button {
+    padding: 10px 20px;
+    margin: 10px;
+  margin-right: 200px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #333333;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button.active {
+    background-color: #ff3737;
+}
+
+button:hover {
+    background-color: #333333;
+    transform: scale(1.1);
+}
+h3{
+  margin-right: 250px;
+}
+</style>
+</head>
+<body>
+  
+    <header>
+        <img  style="position: relative; top: -350px;" src="/img/component-none-fone.png" alt="Логотип">
+    </header>
+
+    <div class="video-container">
+        <div>
+            <h3>Ваша камера</h3>
+            <video id="localVideo" autoplay></video>
+            <button id="toggleCamera">Включить вашу камеру</button>
+            <Br>
+            <button id="toggleAudio">Выключить звук</button>
+        </div>
+        <div>
+            <h3>Камера собеседника</h3>
+            <video id="remoteVideo" autoplay></video>
+            <button id="toggleRemoteCamera">Включить камеру собеседника</button>
+            <br>
+            <button id="toggleRemoteAudio">Выключить звук собеседника</button>
+        </div>
+    </div>
+
+    <script>
+        const localVideoElement = document.getElementById('localVideo');
+        const remoteVideoElement = document.getElementById('remoteVideo');
+        const toggleCameraButton = document.getElementById('toggleCamera');
+        const toggleRemoteCameraButton = document.getElementById('toggleRemoteCamera');
+        const toggleAudioButton = document.getElementById('toggleAudio');
+        const toggleRemoteAudioButton = document.getElementById('toggleRemoteAudio');
+        let localStream = null;
+        let remoteStream = null;
+
+        toggleCameraButton.addEventListener('click', function() {
+            if (!localStream) {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then(function(mediaStream) {
+                        localStream = mediaStream;
+                        localVideoElement.srcObject = localStream;
+                        localVideoElement.style.display = 'block';
+                        toggleCameraButton.textContent = 'Выключить вашу камеру';
+                        toggleCameraButton.classList.add('active');
+                    })
+                    .catch(function(error) {
+                        console.log('Ошибка при получении потока: ' + error);
+                    });
+            } else {
+                localStream.getTracks().forEach(function(track) {
+                    track.stop();
+                });
+                localVideoElement.srcObject = null;
+                localVideoElement.style.display = 'none';
+                toggleCameraButton.textContent = 'Включить вашу камеру';
+                toggleCameraButton.classList.remove('active');
+                localStream = null;
+            }
+        });
+
+        toggleRemoteCameraButton.addEventListener('click', function() {
+            if (!remoteStream) {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then(function(mediaStream) {
+                        remoteStream = mediaStream;
+                        remoteVideoElement.srcObject = remoteStream;
+                        remoteVideoElement.style.display = 'block';
+                        toggleRemoteCameraButton.textContent = 'Выключить камеру собеседника';
+                        toggleRemoteCameraButton.classList.add('active');
+                    })
+                    .catch(function(error) {
+                        console.log('Ошибка при получении потока: ' + error);
+                    });
+            } else {
+                remoteStream.getTracks().forEach(function(track) {
+                    track.stop();
+                });
+                remoteVideoElement.srcObject = null;
+                remoteVideoElement.style.display = 'none';
+                toggleRemoteCameraButton.textContent = 'Включить камеру собеседника';
+                toggleRemoteCameraButton.classList.remove('active');
+                remoteStream = null;
+            }
+        });
+
+        toggleAudioButton.addEventListener('click', function() {
+            localStream.getAudioTracks().forEach(function(track) {
+                track.enabled = !track.enabled;
+                toggleAudioButton.textContent = track.enabled ? 'Выключить звук' : 'Включить звук';
+                toggleAudioButton.classList.toggle('active');
+            });
+        });
+
+        toggleRemoteAudioButton.addEventListener('click', function() {
+            remoteStream.getAudioTracks().forEach(function(track) {
+                track.enabled = !track.enabled;
+                toggleRemoteAudioButton.textContent = track.enabled ? 'Выключить звук собеседника' : 'Включить звук собеседника';
+                toggleRemoteAudioButton.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>
